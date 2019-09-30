@@ -1,0 +1,113 @@
+# Copyright (c) 2019, UK HealthCare (https://ukhealthcare.uky.edu) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+##########################
+
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: baget-pv-claim
+  labels:
+    app: baget
+spec:
+  storageClassName: baget-storage-class
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: baget-apikey-secret
+type: Opaque
+data:
+  apikey: YWRtaW4=
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: baget
+  labels:
+    app: baget
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  selector:
+    app: baget
+  type: LoadBalancer
+  
+---
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: baget
+  namespace: nuget
+  labels:
+    app: baget
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: baget
+  template:
+    metadata:
+      labels:
+        app: baget
+    spec:
+      containers:
+      - name: nuget
+        image: loicsharma/baget:60433fe34a4fe1888312d13e1dd39620f99780d4
+        ports:
+        - containerPort: 80
+        env:
+        - name: ApiKey
+          valueFrom:
+            secretKeyRef:
+              name: baget-apikey-secret
+              key: apikey
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          timeoutSeconds: 3 
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        volumeMounts:
+        - name: baget-persistent-storage
+          mountPath: /app/packages
+      volumes:
+      - name: baget-persistent-storage
+        persistentVolumeClaim:
+          claimName: baget-pv-claim
+          
