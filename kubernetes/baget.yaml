@@ -63,7 +63,6 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: baget
-  namespace: nuget
   labels:
     app: baget
 spec:
