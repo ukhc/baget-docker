@@ -92,3 +92,20 @@ kubectl scale --replicas=4 deployment/baget
 ~~~
 ./local-logs-baget.sh
 ~~~
+
+
+### Values to override
+
+apikey: YWRtaW4=  (the ApiKey for uploading packages to BaGet)
+~~~
+# generate an ApiKey
+openssl rand -base64 15
+
+# base64 encode the ApiKey, use the result in the sed
+echo -n admin | base64
+
+sed -i '' 's/apikey: .*/apikey: Base64EncodedApiKey/' yaml.tmp
+
+# base64 decode the password, if you need to see what it is
+echo YWRtaW4= | base64 --decode
+~~~
