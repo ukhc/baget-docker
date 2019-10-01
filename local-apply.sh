@@ -26,6 +26,36 @@ fi
 
 ##########################
 
+echo "setup the persistent volume for mariadb...."
+mkdir -p /Users/Shared/Kubernetes/persistent-volumes/default/mariadb
+kubectl apply -f https://raw.githubusercontent.com/ukhc/mariadb-docker/master/kubernetes/mariadb-single-local-pv.yaml
+
+##########################
+
+echo "deploy mariadb...."
+kubectl apply -f https://raw.githubusercontent.com/ukhc/mariadb-docker/master/kubernetes/mariadb-single.yaml
+
+echo "wait for mariadb..."
+sleep 2
+isPodReady=""
+isPodReadyCount=0
+until [ "$isPodReady" == "true" ]
+do
+	isPodReady=$(kubectl get pod -l app=mariadb -o jsonpath="{.items[0].status.containerStatuses[*].ready}")
+	if [ "$isPodReady" != "true" ]; then
+		((isPodReadyCount++))
+		if [ "$isPodReadyCount" -gt "100" ]; then
+			echo "ERROR: timeout waiting for mariadb pod. Exit script!"
+			exit 1
+		else
+			echo "waiting...mariadb pod is not ready...($isPodReadyCount/100)"
+			sleep 2
+		fi
+	fi
+done
+
+##########################
+
 echo "apply the persistent volume for baget...."
 mkdir -p /Users/Shared/Kubernetes/persistent-volumes/default/baget
 kubectl apply -f ./kubernetes/baget-local-pv.yaml

@@ -37,6 +37,11 @@ echo "backup packages folder..."
 mkdir -p ./backup/$BACKUP_FOLDER/packages
 kubectl cp $POD:/app/packages ./backup/$BACKUP_FOLDER/packages
 
+echo "backup database..."
+mkdir -p ./backup/$BACKUP_FOLDER/database
+POD=$(kubectl get pod -l app=mariadb -o jsonpath="{.items[0].metadata.name}")
+kubectl exec -it $POD -- /usr/bin/mysqldump -u root -padmin baget > ./backup/$BACKUP_FOLDER/database/baget-dump.sql
+
 ##########################
 
 echo "...done"

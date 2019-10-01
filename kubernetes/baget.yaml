@@ -86,6 +86,10 @@ spec:
             secretKeyRef:
               name: baget-apikey-secret
               key: apikey
+        - name: Database__Type
+          value: MySql
+        - name: Database__ConnectionString
+          value: 'Server=mariadb;User Id=root;Password=admin;Database=baget'
         livenessProbe:
           tcpSocket:
             port: 80

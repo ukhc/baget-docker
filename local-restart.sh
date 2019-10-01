@@ -29,8 +29,37 @@ fi
 echo "stop the baget deployment..."
 kubectl scale --replicas=0 deployment baget
 
+echo "stop the mariadb deployment..."
+kubectl scale --replicas=0 deployment mariadb
+
 echo "wait a moment..."
 sleep 5
+
+##########################
+
+echo "start the mariadb deployment..."
+kubectl scale --replicas=1 deployment mariadb
+
+##########################
+
+echo "wait for mariadb..."
+sleep 2
+isPodReady=""
+isPodReadyCount=0
+until [ "$isPodReady" == "true" ]
+do
+	isPodReady=$(kubectl get pod -l app=mariadb -o jsonpath="{.items[0].status.containerStatuses[*].ready}")
+	if [ "$isPodReady" != "true" ]; then
+		((isPodReadyCount++))
+		if [ "$isPodReadyCount" -gt "100" ]; then
+			echo "ERROR: timeout waiting for mariadb pod. Exit script!"
+			exit 1
+		else
+			echo "waiting...mariadb pod is not ready...($isPodReadyCount/100)"
+			sleep 2
+		fi
+	fi
+done
 
 ##########################
 

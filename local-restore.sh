@@ -64,6 +64,16 @@ kubectl cp ./backup/$BACKUP_FOLDER/packages $POD:/app
 
 ##########################
 
+echo "restore database..."
+POD=$(kubectl get pod -l app=mariadb -o jsonpath="{.items[0].metadata.name}")
+kubectl exec -it $POD -- /usr/bin/mysql -u root -padmin -e 'drop database if exists baget'
+kubectl exec -it $POD -- /usr/bin/mysql -u root -padmin -e 'create database baget'
+kubectl exec -i $POD -- /usr/bin/mysql -u root -padmin baget < ./backup/$BACKUP_FOLDER/database/baget-dump.sql
+# validate
+# kubectl exec -it $POD -- /usr/bin/mysql -u root -padmin -e 'use mediawiki;show tables;'
+
+##########################
+
 echo "restart the baget deployment..."
 kubectl scale --replicas=0 deployment baget
 echo "wait a moment..."
