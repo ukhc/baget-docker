@@ -70,7 +70,7 @@ kubectl exec -it $POD -- /usr/bin/mysql -u root -padmin -e 'drop database if exi
 kubectl exec -it $POD -- /usr/bin/mysql -u root -padmin -e 'create database baget'
 kubectl exec -i $POD -- /usr/bin/mysql -u root -padmin baget < ./backup/$BACKUP_FOLDER/database/baget-dump.sql
 # validate
-# kubectl exec -it $POD -- /usr/bin/mysql -u root -padmin -e 'use mediawiki;show tables;'
+# kubectl exec -it $POD -- /usr/bin/mysql -u root -padmin -e 'use baget;show tables;'
 
 ##########################
 
