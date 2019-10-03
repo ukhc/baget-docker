@@ -76,7 +76,7 @@ spec:
         app: baget
     spec:
       containers:
-      - name: nuget
+      - name: baget
         image: loicsharma/baget:60433fe34a4fe1888312d13e1dd39620f99780d4
         ports:
         - containerPort: 80
